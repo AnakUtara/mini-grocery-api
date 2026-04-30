@@ -1,0 +1,16 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"outDir": "dist",
+		"rootDir": "./" /* This keeps the folder structure identical in dist */,
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"verbatimModuleSyntax": true,
+		"ignoreDeprecations": "6.0"
+	},
+	"include": ["**/*"],
+	"exclude": ["node_modules", "dist"]
+}

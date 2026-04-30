@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  password String?
+  role     Role    @default(CUSTOMER)
+
+  refreshTokens RefreshToken[]
+
+  productsCreated Products[] @relation(name: "ProductCreator")
+  productsUpdated Products[] @relation(name: "ProductUpdater")
+
+  categoriesCreated Category[] @relation(name: "CategoryCreator")
+  categoriesUpdated Category[] @relation(name: "CategoryUpdater")
+
+  orders Order[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("users")
+}
+
+model Products {
+  id           Int     @id @default(autoincrement())
+  title        String
+  thumbnailUrl String? @map("thumbnail_url")
+  description  String?
+  price        Float
+  stock        Int
+
+  createdBy Int  @map("created_by")
+  creator   User @relation(name: "ProductCreator", fields: [createdBy], references: [id])
+
+  updatedBy Int  @map("updated_by")
+  updater   User @relation(name: "ProductUpdater", fields: [updatedBy], references: [id])
+
+  categories ProductCategory[]
+
+  stockHistory ProductStockHistory[]
+
+  orders OrderItem[]
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("products")
+}
+
+model ProductStockHistory {
+  id        Int      @id @default(autoincrement())
+  productId Int      @map("product_id")
+  product   Products @relation(fields: [productId], references: [id])
+  oldStock  Int      @map("old_stock")
+  newStock  Int      @map("new_stock")
+  notes     String?
+  changedAt DateTime @default(now()) @map("changed_at")
+
+  @@map("product_stock_history")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("refresh_tokens")
+}
+
+model Category {
+  id       Int               @id @default(autoincrement())
+  name     String            @unique
+  products ProductCategory[]
+
+  createdBy Int  @map("created_by")
+  creator   User @relation(name: "CategoryCreator", fields: [createdBy], references: [id])
+
+  updatedBy Int  @map("updated_by")
+  updater   User @relation(name: "CategoryUpdater", fields: [updatedBy], references: [id])
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  @@map("categories")
+}
+
+model ProductCategory {
+  productId  Int @map("product_id")
+  categoryId Int @map("category_id")
+
+  product  Products @relation(fields: [productId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@id([productId, categoryId])
+  @@map("product_categories")
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  userId     Int         @map("user_id")
+  user       User        @relation(fields: [userId], references: [id])
+  totalPrice Float       @map("total_price")
+  status     OrderStatus @default(PENDING)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id Int @id @default(autoincrement())
+
+  orderId Int   @map("order_id")
+  order   Order @relation(fields: [orderId], references: [id])
+
+  productId Int      @map("product_id")
+  product   Products @relation(fields: [productId], references: [id])
+
+  quantity Int
+  price    Float
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("order_items")
+}
