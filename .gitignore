@@ -7,3 +7,13 @@ node_modules
 
 logs
 *.log
+
+DS_Store
+.DS_Store
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?  
