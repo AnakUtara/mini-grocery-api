@@ -3,11 +3,13 @@
 	"version": "1.0.0",
 	"scripts": {
 		"dev": "tsx watch src/index.ts",
-		"build": "npx prisma generate && npx tsc",
+		"build": "npm run gen:prod && npx tsc",
 		"start": "node dist/src/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"mig:dev": "npx prisma migrate dev",
-		"gen:dev": "npx prisma generate"
+		"gen:dev": "npx prisma generate",
+		"mig:prod": "npx prisma migrate deploy",
+		"gen:prod": "npx prisma generate"
 	},
 	"keywords": [],
 	"author": "",
